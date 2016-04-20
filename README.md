@@ -10,8 +10,8 @@ Install-module HybridWorkerToolkit
 ###Manually Install
 Download this module from github, and place the HybridWorkerToolkit module folder to 'C:\Program Files\WindowsPowerShell\Modules'
 
-##Download from PowerShell Gallery
-Find-Module HybridWorkerToolkit | Save-Module -Force -Path <Folder to save the module>
+###Download from PowerShell Gallery
+Find-Module HybridWorkerToolkit | Save-Module -Force -Path 'C:\Temp'
 
 ##PowerShell functions
 ###Get-HybridWorkerConfiguration
