@@ -3,6 +3,16 @@
 ##Description
 This repository contains the PowerShell module HybridWorkerToolkit. This PS module is designed to run on Azure Automation Hybrid Workers. It provides various functions that can be called within an Azure Automation runbook when triggered on Hybrid Workers. These activities can assist gathering information about hybrid workers and the runbook runtime environment. It also provides a function to log structured events to the Hybrid Workers Windows Event log.
 
+##Install Instruction
+###Install from PowerShell Gallery
+Install-module HybridWorkerToolkit
+
+###Manually Install
+Download this module from github, and place the HybridWorkerToolkit module folder to 'C:\Program Files\WindowsPowerShell\Modules'
+
+##Download from PowerShell Gallery
+Find-Module HybridWorkerToolkit | Save-Module -Force -Path <Folder to save the module>
+
 ##PowerShell functions
 ###Get-HybridWorkerConfiguration
 Get the Hybrid Worker and the Microsoft Monitoring Agent configuration. a hashtable is returned with various configuration properties of Hybrid Worker 
