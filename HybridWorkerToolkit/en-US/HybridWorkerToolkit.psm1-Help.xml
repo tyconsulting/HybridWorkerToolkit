@@ -266,9 +266,9 @@ Note: some properties are only returned when this function is called within a Az
             <maml:introduction>
                <maml:para>PS C:\&gt;</maml:para>
             </maml:introduction>
-            <dev:code>New-HybridWorkerRunbookLogEntry -Log System -Id 888 -Level &apos;Error&apos; -Source &apos;AzureAutomation Job Process&apos; -Message &quot;This is an error test message logged from hybrid worker within a runbook.&quot;</dev:code>
+            <dev:code>New-HybridWorkerRunbookLogEntry -LogName System -Id 888 -Level &apos;Error&apos; -Source &apos;AzureAutomation Job Process&apos; -LogHybridWorkerConfig $true -Message &quot;This is an error test message logged from hybrid worker within a runbook.&quot;</dev:code>
             <dev:remarks>
-               <maml:para>Write an error event with Id 888 and source &apos;AzureAutomation Job Process&apos; to the System log.</maml:para>
+               <maml:para>Write an error event with Id 888 and source &apos;AzureAutomation Job Process&apos; to the System log with additional information about Hybrid Worker configuration.</maml:para>
             </dev:remarks>
          </command:example>
       </command:examples>

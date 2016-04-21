@@ -25,7 +25,7 @@ Function Get-HybridWorkerConfiguration
     $MMAConfig = New-Object -ComObject 'AgentConfigManager.MgmtSvcCfg'
     $MMAVersion = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Microsoft Operations Manager\3.0\Setup").AgentVersion
     $HybridWorkerConfig = @{
-        HyrbridWorkerGroupName = $HybridWorkerRegKeyValues.RunbookWorkerGroup
+        HybridWorkerGroupName = $HybridWorkerRegKeyValues.RunbookWorkerGroup
         AutomationAccountId = $HybridWorkerRegKeyValues.AccountId
         MachineId = $HybridWorkerRegKeyValues.MachineId
         ComputerName = $env:COMPUTERNAME
@@ -47,7 +47,7 @@ Function Get-HybridWorkerJobRuntimeInfo
     #Make sure this function is executed within a runbook
     If ($PSPrivateMetadata -eq $null -and $env:AUTOMATION_ASSET_SANDBOX_ID -eq $null)
     {
-        Throw "Get-HybridWorkerJobRuntimeInfo function must be executed within a Azure Automation runbook executed on a Hybrid Worker."
+        Throw "Get-HybridWorkerJobRuntimeInfo function must be executed within an Azure Automation runbook executed on a Hybrid Worker."
         Exit -1
     }
 
@@ -83,7 +83,6 @@ Function Get-HybridWorkerJobRuntimeInfo
     #Get account name, resource group name and subscription Id
     $RunbookType = ($3732LogEntryXML.Event.EventData.Data | Where-Object {$_.name -ieq 'runbookType'}).'#text'.Trim("{ }")
     $JobEventDetails.Add('RunbookType', $RunbookType)
-    Write-Verbose "Done getting job event details."
 
     $JobInfo = @{
         JobId = $JobEventDetails.JobId;
@@ -108,7 +107,7 @@ Function Get-HybridWorkerJobRuntimeInfo
 Function New-HybridWorkerRunbookLogEntry
 {
     Param(
-        [Parameter(Mandatory=$false,HelpMessage='Please specify the event log name')][String]$LogName= 'Application',
+        [Parameter(Mandatory=$false,HelpMessage='Please specify the event log name')][Alias('Log')][String]$LogName= 'Application',
         [Parameter(Mandatory=$true,HelpMessage='Please specify the event log ID')][int]$Id,
         [Parameter(Mandatory=$false,HelpMessage='Please specify the event level')][String][ValidateSet('Information', 'Warning', 'Error')]$Level= 'Information',
         [Parameter(Mandatory=$false,HelpMessage='Please specify the event log source')][String][ValidateSet('AzureAutomation Job Verbose', 'AzureAutomation Job Status', 'AzureAutomation Job Result','AzureAutomation Job Process')]$Source = 'AzureAutomation Job Status',
@@ -158,7 +157,7 @@ Function New-HybridWorkerRunbookLogEntry
 
     #Add environment related info
     $MessageArray += "AutomationAccountName: $($Script:RunbookRuntimeInfo.AccountName)"
-    $MessageArray += "HybridWorkerGroupName: $($Script:HybridWorkerConfig.HyrbridWorkerGroupName)"
+    $MessageArray += "HybridWorkerGroupName: $($Script:HybridWorkerConfig.HybridWorkerGroupName)"
     $MessageArray += "ResourceGroupName: $($Script:RunbookRuntimeInfo.ResourceGroupName)"
     $MessageArray += "AzureSubscriptionId: $($Script:RunbookRuntimeInfo.SubscriptionId)"
     If ($LogHybridWorkerConfig -eq $true)
