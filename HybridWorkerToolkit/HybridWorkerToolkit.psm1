@@ -111,8 +111,10 @@ Function New-HybridWorkerRunbookLogEntry
         [Parameter(Mandatory=$true,HelpMessage='Please specify the event log ID')][int]$Id,
         [Parameter(Mandatory=$false,HelpMessage='Please specify the event level')][String][ValidateSet('Information', 'Warning', 'Error')]$Level= 'Information',
         [Parameter(Mandatory=$false,HelpMessage='Please specify the event log source')][String][ValidateSet('AzureAutomation Job Verbose', 'AzureAutomation Job Status', 'AzureAutomation Job Result','AzureAutomation Job Process')]$Source = 'AzureAutomation Job Status',
-        [Parameter(Mandatory=$false,HelpMessage='Please specify if the Hybrid Worker configuration should be logged in the event log too')][Boolean]$LogHybridWorkerConfig=$false,
-        [Parameter(Mandatory=$true,HelpMessage='Please specify the event log message')][String]$Message
+        [Parameter(Mandatory=$false,HelpMessage='Please specify if the Hybrid Worker configuration should be logged in the event log too')][ValidateScript({if ($_ -eq $true) {$LogMinimum -ne $true}})][Boolean]$LogHybridWorkerConfig=$false,
+        [Parameter(Mandatory=$false,HelpMessage='Please specify if only the minimum information (JobId) should be logged')][ValidateScript({if ($_ -eq $true) {$LogHybridWorkerConfig -ne $true}})][Boolean][Alias('Minimum')]$LogMinimum=$false,
+        [Parameter(Mandatory=$true,HelpMessage='Please specify the event log message')][String]$Message,
+        [Parameter(Mandatory=$false,HelpMessage='Please specify additional event parameters')][String[]]$AdditionalParameters
     )
     #make sure the event log specified exists
     If (!([System.Diagnostics.EventLog]::Exists($LogName)))
@@ -154,35 +156,47 @@ Function New-HybridWorkerRunbookLogEntry
     $evtObject.Source = $Source;
     $MessageArray = @()
     $MessageArray += $Message
-
-    #Add environment related info
-    $MessageArray += "AutomationAccountName: $($Script:RunbookRuntimeInfo.AccountName)"
-    $MessageArray += "HybridWorkerGroupName: $($Script:HybridWorkerConfig.HybridWorkerGroupName)"
-    $MessageArray += "ResourceGroupName: $($Script:RunbookRuntimeInfo.ResourceGroupName)"
-    $MessageArray += "AzureSubscriptionId: $($Script:RunbookRuntimeInfo.SubscriptionId)"
-    If ($LogHybridWorkerConfig -eq $true)
+    
+    #Add user-specified additional parameterss
+    If ($AdditionalParameters.count -gt 0)
     {
-        $MessageArray += "OMSWorkspaceId: $($Script:HybridWorkerConfig.MMAOMSWorkspaceId)"
+        Foreach ($item in $AdditionalParameters)
+        {
+            $MessageArray += $item
+        }
     }
-
-    #Add agent related info
-    If ($LogHybridWorkerConfig -eq $true)
+    If ($LogMinimum -eq $false)
     {
-        $MessageArray += "HybridWorkerVersion: $($Script:HybridWorkerConfig.HybridWorkerVersion)"
-        $MessageArray += "MMAVersion: $($Script:HybridWorkerConfig.MMAVersion)"
-        $MessageArray += "MMAInstallRoot: $($Script:HybridWorkerConfig.MMAInstallRoot)"
-        $MessageArray += "MMAProxyUrl: $($Script:HybridWorkerConfig.MMAProxyUrl)"
-        $MessageArray += "SystemProxy: $($Script:HybridWorkerConfig.SystemProxy)"
+        #Add environment related info
+        $MessageArray += "AutomationAccountName: $($Script:RunbookRuntimeInfo.AccountName)"
+        $MessageArray += "HybridWorkerGroupName: $($Script:HybridWorkerConfig.HybridWorkerGroupName)"
+        $MessageArray += "ResourceGroupName: $($Script:RunbookRuntimeInfo.ResourceGroupName)"
+        $MessageArray += "AzureSubscriptionId: $($Script:RunbookRuntimeInfo.SubscriptionId)"
+        If ($LogHybridWorkerConfig -eq $true)
+        {
+            $MessageArray += "OMSWorkspaceId: $($Script:HybridWorkerConfig.MMAOMSWorkspaceId)"
+        }
+
+        #Add agent related info
+        If ($LogHybridWorkerConfig -eq $true)
+        {
+            $MessageArray += "HybridWorkerVersion: $($Script:HybridWorkerConfig.HybridWorkerVersion)"
+            $MessageArray += "MMAVersion: $($Script:HybridWorkerConfig.MMAVersion)"
+            $MessageArray += "MMAInstallRoot: $($Script:HybridWorkerConfig.MMAInstallRoot)"
+            $MessageArray += "MMAProxyUrl: $($Script:HybridWorkerConfig.MMAProxyUrl)"
+            $MessageArray += "SystemProxy: $($Script:HybridWorkerConfig.SystemProxy)"
+        }
+
+        #Add runbook and job related info
+        $MessageArray += "JobId: $($Script:RunbookRuntimeInfo.JobId)"
+        $MessageArray += "SandboxId: $($Script:RunbookRuntimeInfo.SandboxId)"
+        $MessageArray += "ProcessId: $($Script:RunbookRuntimeInfo.ProcessId)"
+        $MessageArray += "CurrentWorkingDirectory: $($Script:RunbookRuntimeInfo.CurrentWorkingDirectory)"
+        $MessageArray += "RunbookType: $($Script:RunbookRuntimeInfo.RunbookType)"
+        $MessageArray += "RunbookName: $($Script:RunbookRuntimeInfo.RunbookName)"
+        $MessageArray += "TimeTakenToStartRunninginSeconds: $($Script:RunbookRuntimeInfo.TimeTakenToStartRunninginSeconds)"
+    } else {
+        $MessageArray += "JobId: $($Script:RunbookRuntimeInfo.JobId)"
     }
-
-    #Add runbook and job related info
-    $MessageArray += "JobId: $($Script:RunbookRuntimeInfo.JobId)"
-    $MessageArray += "SandboxId: $($Script:RunbookRuntimeInfo.SandboxId)"
-    $MessageArray += "ProcessId: $($Script:RunbookRuntimeInfo.ProcessId)"
-    $MessageArray += "CurrentWorkingDirectory: $($Script:RunbookRuntimeInfo.CurrentWorkingDirectory)"
-    $MessageArray += "RunbookType: $($Script:RunbookRuntimeInfo.RunbookType)"
-    $MessageArray += "RunbookName: $($Script:RunbookRuntimeInfo.RunbookName)"
-    $MessageArray += "TimeTakenToStartRunninginSeconds: $($Script:RunbookRuntimeInfo.TimeTakenToStartRunninginSeconds)"
-
     $evtObject.WriteEvent($evtId, $MessageArray)
 }
